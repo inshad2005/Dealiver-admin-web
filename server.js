@@ -182,33 +182,37 @@ app.get('/updateuserstatus/:id',(req,res)=>{
 app.post('/forgot',(req,res)=>{
 	var email = req.body.email;
 	if(email != "" && email != null){
+		
 		Admin.findOne({where:{user_email:email}}).then((result)=>{
-			if(result != "" && result != null){
-				var randomstring = Math.random().toString(36).slice(-8);
-				result.update({password:passwordHash.generate(randomstring),decoded_password:randomstring}).then((reslt)=>{
-					var mailOptions = {
-					    to: 'promatics.tajinder@gmail.com',
-					    subject: 'Dealiver Password',
-					    user: {
-					    	username:reslt.username,
-              				password:reslt.decoded_password
-					    }
-					}
-					app.mailer.send('forgot',mailOptions, function (err,message) {
-		                if (err) {
-		                  // handle error 
-		                  console.log(err);
-		                  res.send('There was an error sending the email');
-		                  return;
-		                }
-		                res.send({response: true,message: 'Your Account password has been sent to registered email account'});
-	            	});
-				},err=>{
-					res.end({response:false});	
-				})
-			}else{
-				res.end({response:false,message:"Email not found in database",result:result});
-			}
+				if(result != null && result != ''){
+					
+					var randomstring = Math.random().toString(36).slice(-8);
+					result.update({password:passwordHash.generate(randomstring),decoded_password:randomstring}).then((reslt)=>{
+						var mailOptions = {
+						    to: 'promatics.tajinder@gmail.com',
+						    subject: 'Dealiver Password',
+						    user: {
+						    	username:reslt.username,
+	              				password:reslt.decoded_password
+						    }
+						}
+						app.mailer.send('forgot',mailOptions, function (err,message) {
+			                if (err) {
+			                  // handle error 
+			                  console.log(err);
+			                  res.send('There was an error sending the email');
+			                  return;
+			                }
+			                res.send({response: true,message: 'Your Account password has been sent to registered email account,Please check your Email'});
+		            	});
+					},err=>{
+						res.end({response:false});	
+					})
+				}
+				else{
+
+					res.send({response:false,message:"Email not found in database",result:'dd'});
+				}
 		},err=>{
 			res.end({response:false});	
 		})
